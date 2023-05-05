@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload and Prefill Form</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body style="background-color: orange;">
+  <div class="container">
+    <h1 class="my-4">Upload and Prefill Form</h1>
+    <form id="myForm">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" class="form-control" id="name" name="name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" id="email" name="email">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="tel" class="form-control" id="phone" name="phone">
+      </div>
+
+      <div class="form-group">
+        <label for="file">Upload Information:</label>
+        <input type="file" class="form-control-file" id="file" name="file" accept=".pdf,.doc,.docx">
+      </div>
+
+      <div class="form-group">
+        <button type="button" class="btn btn-primary" onclick="prefillForm()">Prefill</button>
+        <button type="submit" class="btn btn-success">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    function prefillForm() {
+      const fileInput = document.getElementById("file");
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select a file.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split("\n");
+        const data = {};
+        for (let line of lines) {
+          const [key, value] = line.split(":");
+          data[key.trim()] = value.trim();
+        }
+        $("#name").val(data["Name"]);
+        $("#email").val(data["Email"]);
+        $("#phone").val(data["Phone"]);
+      };
+      reader.readAsText(file);
+    }
+  </script>
+  <?php
+  // Database credentials
+  $servername = "localhost";
+  $username = "yourusername";
+  $password = "yourpassword";
+  $dbname = "yourdatabase";
+  
+  // Create connection
+  $conn = mysqli_connect($servername, $username, $password, $dbname);
+  
+  // Check connection
+  if (!$conn) {
+      die("Connection failed: " . mysqli_connect_error());
+  }
+  
+  // Process form submission
+  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+      $name = $_POST["name"];
+      $email = $_POST["email"];
+      $phone = $_POST["phone"];
+  
+      // Insert form data into database
+      $sql = "INSERT INTO users (name, email, phone) VALUES ('$name', '$email', '$phone')";
+  
+      if (mysqli_query($conn, $sql)) {
+          // Data was successfully stored in database
+          header("Location: thankyou.html");
+          exit;
+      } else {
+          // An error occurred while storing the data
+          echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+      }
+  }
+  
+  // Close database connection
+  mysqli_close($conn);
+  ?>
+  
+</body>
+</html>
